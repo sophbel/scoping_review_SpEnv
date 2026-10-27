@@ -24,7 +24,7 @@ library(stringr)
 ################################################################################
 
 ## 2026 screen
-excluded_all <- fread("./excluded_reasons/june_2026_screen/articles.csv")
+excluded_all <- fread("./excluded_reasons/articles.csv")
 
 ## pull out what is after
 extractedreasons <- sub(".*RAYYAN-EXCLUSION-REASONS:\\s*", "", excluded_all$notes)
@@ -1229,11 +1229,11 @@ library(dplyr)
 library(purrr)
 library(stringr)
 
-cigex <- fread("./excluded_reasons/june_2026_screen/cigarette_experiments/articles.csv")
+cigex <- fread("./excluded_reasons/cigarette_experiments/articles.csv")
 cigex$type <- "cigarette_experiment"
-pas<- fread("./excluded_reasons/june_2026_screen/passive_cigarettesmoke/articles.csv")
+pas<- fread("./excluded_reasons/passive_cigarettesmoke/articles.csv")
 pas$type <- "passive_smoking"
-air <- fread("./excluded_reasons/june_2026_screen/isolationinair/articles.csv")
+air <- fread("./excluded_reasons/isolationinair/articles.csv")
 air$type <- "isolation_in_air"
 # 1. Helper function to extract the first surname (for sorting)
 get_first_surname <- function(author_str) {
@@ -1286,9 +1286,9 @@ pas_clean   <- clean_and_sort(pas)
 cigex_clean <- clean_and_sort(cigex)
 air_clean   <- clean_and_sort(air)
 # Save as three separate CSV files
-write.table(pas_clean,   "./excluded_reasons/june_2026_screen/pas_clean.csv",   row.names = FALSE, quote = FALSE, sep = "\t")
-write.table(cigex_clean, "./excluded_reasons/june_2026_screen/cigex_clean.csv", row.names = FALSE, quote = FALSE, sep = "\t")
-write.table(air_clean,   "./excluded_reasons/june_2026_screen/air_clean.csv",   row.names = FALSE, quote = FALSE, sep = "\t")
+write.table(pas_clean,   "./excluded_reasons/pas_clean.csv",   row.names = FALSE, quote = FALSE, sep = "\t")
+write.table(cigex_clean, "./excluded_reasons/cigex_clean.csv", row.names = FALSE, quote = FALSE, sep = "\t")
+write.table(air_clean,   "./excluded_reasons/air_clean.csv",   row.names = FALSE, quote = FALSE, sep = "\t")
 ################################################################################
 # 
 # ########### STUDIES IN BOXES FROM EVIDENCE SUMMARY
