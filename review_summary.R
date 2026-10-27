@@ -22,13 +22,9 @@ library(stringr)
 ################################################################################
 ##### counting reasons for exclusion in each category. 
 ################################################################################
-### before re-screen in June 2026
-# excluded <- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/excluded_reasons/articles.csv")
-# excluded2 <- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/excluded_reasons/jan2026_update/articles.csv")
-# excluded_all <- rbind(excluded,excluded2)
 
-## 2026 re-screen
-excluded_all <- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/excluded_reasons/june_2026_screen/articles.csv")
+## 2026 screen
+excluded_all <- fread("./excluded_reasons/june_2026_screen/articles.csv")
 
 ## pull out what is after
 extractedreasons <- sub(".*RAYYAN-EXCLUSION-REASONS:\\s*", "", excluded_all$notes)
@@ -90,7 +86,7 @@ reason_flags <- data.frame(
 reason_flags$match_count <- rowSums(reason_flags[, c("env", "article", "outcome", "other")])
 multi_matches <- reason_flags[reason_flags$match_count > 1, ]
 colnames(reason_flags) <- c("citation", "wrong/unquantified exposure","wrong article type", "wrong outcome", "duplicate")
-write.table(reason_flags, file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/excluded_reasons/full_text_exclusions_2026.csv", sep = ",", quote = FALSE , col.names = TRUE, row.names = FALSE)
+write.table(reason_flags, file = "./excluded_reasons/full_text_exclusions_2026.csv", sep = ",", quote = FALSE , col.names = TRUE, row.names = FALSE)
 
 
 
@@ -98,7 +94,7 @@ write.table(reason_flags, file = "/Users/sophie.belman/Documents/Projects/scopin
 ################################################################################
 ##### summarize experimental and epidemiological results with effect direction
 ################################################################################
-expr <- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/experimental_results_2026.csv")
+expr <- fread("./extracted_results/experimental_results_2026.csv")
 # expr$PM2.5 <- gsub(".","",expr$PM2.5)
 expr$type <- "experimental"
 exposures <- colnames(expr)[10:22]
@@ -118,7 +114,7 @@ summexp <- expr %>%
   arrange(simple_effect)
 sum(summexp[grep("cig|air",summexp$simple_effect),"unique_studies"])
 ######## read in epi data
-epir <- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/epidemiological_results_2026.csv")# 
+epir <- fread("./extracted_results/epidemiological_results_2026.csv")# 
 epir$type <- "epidemiological"
 exposures <- colnames(epir)[15:36]
 tmp <- epir[, exposures, with = FALSE]
@@ -155,12 +151,12 @@ epir_geo <- epir %>%
   left_join(geo_data, by = "Location")
 
 ### save long lat data set
-saveRDS(epir_geo, file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/epidemiological_results_latlon_2026.rds")
+saveRDS(epir_geo, file = "./extracted_results/epidemiological_results_latlon_2026.rds")
 
 ################################################################################
 ####### ADD KOPPEN CODES AND PLOT LOCATIONS
 ################################################################################
-epir_geo <- readRDS( file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/epidemiological_results_latlon_2026.rds")
+epir_geo <- readRDS( file = "./extracted_results/epidemiological_results_latlon_2026.rds")
 epir_geo$simple_effect <- factor(epir_geo$simple_effect , levels = c("air_quality","meteorology + air quality", "meteorology"),
                                  labels = c("air pollutants","meteorology + air pollutants", "meteorology"))
 # Get world map data
@@ -189,8 +185,8 @@ mapepi <- ggplot() +
   theme(panel.grid = element_blank(), legend.position = "right")
 
   print(mapepi)
-  ggsave(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_location_map_2026.png", width = 8, height = 6)
-  pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_location_map_2026.pdf", width = 8, height = 6)
+  ggsave(file = "./manuscript/figures/epidemiological_location_map_2026.png", width = 8, height = 6)
+  pdf(file = "./manuscript/figures/epidemiological_location_map_2026.pdf", width = 8, height = 6)
   print(mapepi)
   dev.off()
   
@@ -241,10 +237,10 @@ mapepi <- ggplot() +
   
   print(mapepi_china)
   
-  pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_WesternEurope_map_2026.pdf", width = 3.8, height = 3.8)
+  pdf(file = "./manuscript/figures/epidemiological_WesternEurope_map_2026.pdf", width = 3.8, height = 3.8)
   print(mapepi_westeurope)
   dev.off()
-  pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_China_map_2026.pdf", width = 3.8, height = 3.8)
+  pdf(file = "./manuscript/figures/epidemiological_China_map_2026.pdf", width = 3.8, height = 3.8)
   print(mapepi_china)
   dev.off()
   
@@ -252,11 +248,11 @@ mapepi <- ggplot() +
   
   
 ########## read in climate zones and harmonize ########
-epir_geo <- readRDS( file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/epidemiological_results_latlon_2026.rds")
+epir_geo <- readRDS( file = "./extracted_results/epidemiological_results_latlon_2026.rds")
 colnames(epir_geo)[which(colnames(epir_geo)=="long")] <- "lon"
 pts <- vect(epir_geo, geom = c("lon", "lat"), crs = "EPSG:4326")
-kg <- rast("/Users/sophie.belman/Documents/Projects/scoping_review_2026/koppen/1991_2020/koppen_geiger_0p00833333.tif")
-kglookup <- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/koppen/koppen_lookup.csv")
+kg <- rast("./koppen/1991_2020/koppen_geiger_0p00833333.tif")
+kglookup <- fread("./koppen/koppen_lookup.csv")
 kglookup$Description <- gsub(", ","_",kglookup$Description)
 kglookup$Description <- gsub(",","",kglookup$Description)
 ## extract
@@ -323,20 +319,20 @@ epir_geo$koppen_code[which(epir_geo$Country=="Global")] <- NA
 epir_geo$Description[which(epir_geo$Country=="Global")] <- "Global"
 
 sub <- epir_geo[,c("Study","Location","koppen_code","Description")]
-saveRDS(epir_geo, file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/epidemiological_results_latlon_koppen_2026.rds")
+saveRDS(epir_geo, file = "./extracted_results/epidemiological_results_latlon_koppen_2026.rds")
 
 
 ################################################################################
 ############SUMMARIZE DATA
 ################################################################################
-epir_geo <- readRDS( file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/epidemiological_results_latlon_koppen_2026.rds")
+epir_geo <- readRDS( file = "./extracted_results/epidemiological_results_latlon_koppen_2026.rds")
 epir_geo$Study[grepl("Australia",epir_geo$Country)]
 
 epir_geoair <- epir_geo[grepl("air",epir_geo$simple_effect),]
 ################################################################################
 ############ PLOT HEATMAPS WITH EPIDEMIOLOGICAL RESULTS  #################
 ################################################################################
-epir_geo <- readRDS( file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/epidemiological_results_latlon_koppen_2026.rds")
+epir_geo <- readRDS( file = "./extracted_results/epidemiological_results_latlon_koppen_2026.rds")
 exposures <- colnames(epir_geo)[15:37]
 cols_interest <- c("Study","StudyA","simple_outcome","outcome",exposures)
 epirhm <- epir_geo[,..cols_interest]
@@ -445,8 +441,8 @@ epi_heatmap <- ggplot(df_plot2, aes(x = Study, y = Exposure, fill = Effect, grou
   facet_grid(fct_relevel(Facet_Group,'Annotations','Air Quality','Meteorological')~.,scales = "free_y", space = "free_y")
 
 print(epi_heatmap)
-ggsave(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_heatmap_2026.png", width = 8, height = 7)
-cairo_pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_heatmap_2026.pdf", width = 8, height = 7)
+ggsave(file = "./manuscript/figures/epidemiological_heatmap_2026.png", width = 8, height = 7)
+cairo_pdf(file = "./manuscript/figures/epidemiological_heatmap_2026.pdf", width = 8, height = 7)
 print(epi_heatmap)
 dev.off()
 
@@ -498,8 +494,8 @@ epi_heatmap_vertical <- ggplot(df_plot2, aes(y = Study, x = Exposure, fill = Eff
   facet_grid(. ~ fct_relevel(Facet_Group, 'Annotations','Air Quality','Meteorological'),scales = "free_x",space = "free_x")
 
 print(epi_heatmap_vertical)
-ggsave(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_heatmap_vertical_2026.png", width = 7, height = 8)
-pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_heatmap_vertical_2026.pdf", width = 7, height = 8)
+ggsave(file = "./manuscript/figures/epidemiological_heatmap_vertical_2026.png", width = 7, height = 8)
+pdf(file = "./manuscript/figures/epidemiological_heatmap_vertical_2026.pdf", width = 7, height = 8)
 print(epi_heatmap_vertical)
 dev.off()
 
@@ -507,7 +503,7 @@ dev.off()
 #### PLOT number of studies in each region by climate ####
 ################################################################################
 library(countrycode)
-epir_geo <- readRDS( file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/epidemiological_results_latlon_koppen_2026.rds")
+epir_geo <- readRDS( file = "./extracted_results/epidemiological_results_latlon_koppen_2026.rds")
 epir_geo$Country_clean <- recode(
   epir_geo$Country,
   "The_Gambia"   = "Gambia",
@@ -539,8 +535,8 @@ climcount <- ggplot(studies_over_time, aes(x=Continent, y = n_studies, fill = Ma
   theme(text = element_text(size = 12), legend.position = "right") +
   theme(axis.text.x = element_text(angle=45,hjust=1))
 print(climcount)
-ggsave(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/clim_count_2026.png", width = 3, height = 3)
-pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/clim_count_2026.pdf", width = 3, height = 3)
+ggsave(file = "./manuscript/figures/clim_count_2026.png", width = 3, height = 3)
+pdf(file = "./manuscript/figures/clim_count_2026.pdf", width = 3, height = 3)
 print(climcount)
 dev.off()
 
@@ -670,8 +666,8 @@ freqev <- ggplot(df_counts,
   facet_grid(. ~ simple_outcome)
 
 print(freqev)
-ggsave(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_evidence_frequency_2026.png", width = 8, height = 4)
-pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_evidence_frequency_2026.pdf", width = 8, height = 4)
+ggsave(file = "./manuscript/figures/epidemiological_evidence_frequency_2026.png", width = 8, height = 4)
+pdf(file = "./manuscript/figures/epidemiological_evidence_frequency_2026.pdf", width = 8, height = 4)
 print(freqev)
 dev.off()
 
@@ -716,14 +712,14 @@ mapepiclim <- ggplot() +
   facet_wrap(~ Exposure_Group, ncol = 1)
 
 print(mapepiclim)
-ggsave(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_evidence_HumRFTemp_2026.png", width = 8, height = 8)
-pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_evidence_HumRFTemp_2026.pdf", width = 8, height = 8)
+ggsave(file = "./manuscript/figures/epidemiological_evidence_HumRFTemp_2026.png", width = 8, height = 8)
+pdf(file = "./manuscript/figures/epidemiological_evidence_HumRFTemp_2026.pdf", width = 8, height = 8)
 print(mapepiclim)
 dev.off()
 ################################################################################
 ############ PLOT HEATMAP OF EXPERIMENTAL EXPOSURES, OUTCOMES, AND EFFECTS #####
 ################################################################################
-expr <- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/experimental_results_2026.csv")
+expr <- fread("./extracted_results/experimental_results_2026.csv")
 expr_long <- expr %>%
   mutate(study_row = row_number(),
   study_label = Studya) %>% 
@@ -805,8 +801,8 @@ exp_plot <- ggplot() +
   labs(x = "",y = "",fill = "Effect") 
 
 print(exp_plot)
-ggsave(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/experimental_heatmap_2026.png", width = 10, height = 9)
-pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/experimental_heatmap_2026.pdf", width = 10, height = 9)
+ggsave(file = "./manuscript/figures/experimental_heatmap_2026.png", width = 10, height = 9)
+pdf(file = "./manuscript/figures/experimental_heatmap_2026.pdf", width = 10, height = 9)
 print(exp_plot)
 dev.off()
 # 
@@ -916,14 +912,14 @@ epi_heatmap_vertical <- ggplot(df_plot4, aes(y = Study, x = Exposure, fill = Eff
   facet_grid(. ~ fct_relevel(Facet_Group, 'Annotations','Air Quality','Meteorological'),scales = "free_x",space = "free_x")
 
 print(epi_heatmap_vertical)
-ggsave(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_heatmap_vertical_aggregatePM_2026.png", width = 7, height = 8)
-pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/epidemiological_heatmap_vertical_aggregatePM_2026.pdf", width = 7, height = 8)
+ggsave(file = "./manuscript/figures/epidemiological_heatmap_vertical_aggregatePM_2026.png", width = 7, height = 8)
+pdf(file = "./manuscript/figures/epidemiological_heatmap_vertical_aggregatePM_2026.pdf", width = 7, height = 8)
 print(epi_heatmap_vertical)
 dev.off()
 
 
 ############## EXPERIMENTAL REORDER AND CLUSTER ################################
-expr <- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/experimental_results_2026.csv")
+expr <- fread("./extracted_results/experimental_results_2026.csv")
 expr_long <- expr %>%
   mutate(study_row = row_number(),
          study_label = Studya) %>% 
@@ -1011,8 +1007,8 @@ exp_plot <- ggplot() +
   scale_x_discrete(position = "top") +
   labs(x = "",y = "",fill = "Effect") 
 print(exp_plot)
-ggsave(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/experimental_heatmap_aggregatePM_2026.png", width = 10, height = 9)
-pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/experimental_heatmap_aggregatePM_2026.pdf", width = 10, height = 9)
+ggsave(file = "./manuscript/figures/experimental_heatmap_aggregatePM_2026.png", width = 10, height = 9)
+pdf(file = "./manuscript/figures/experimental_heatmap_aggregatePM_2026.pdf", width = 10, height = 9)
 print(exp_plot)
 dev.off()
 
@@ -1026,7 +1022,7 @@ library(data.table)
 library(tidyr)
 library(textshaping)
 ## load in experimental data and combine the exposures of interest
-expr <- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/experimental_results_2026.csv")
+expr <- fread("./extracted_results/experimental_results_2026.csv")
 expr_long <- expr %>%
   mutate(study_row = row_number(),study_label = Studya) %>% 
   pivot_longer(cols = c(PM2.5, PM10, BC, Wood_Smoke, Diesel, Dust, HM, Hot, RT, Cold, Rh, Rf, Sunlight),
@@ -1052,7 +1048,7 @@ ftable(expr_longagg$exposure,expr_longagg$simple_outcome,expr_longagg$effect)
 exp_evidence <- expr_longagg[,c("exposure","simple_outcome","effect")]
 
 #### load in the epidemiological data
-epir_geo <- readRDS( file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/epidemiological_results_latlon_koppen_2026.rds")
+epir_geo <- readRDS( file = "./extracted_results/epidemiological_results_latlon_koppen_2026.rds")
 df_long <- epir_geo %>%
   pivot_longer(cols = c(PM2.5, PM10, CO, NO, NO2, NOx, O3, SO2, VOC, HM, BC, Diesel, Dust,
                         Vis, Tmin, Tmax, Tmean, Rf, AHmean, RHmean, VPmean, SunD, WS), names_to = "Exposure",values_to = "Effect")
@@ -1170,15 +1166,15 @@ support <- ggplot(df_summary2 %>% filter(total_studies > 0), aes(x = Exposure, y
 
 
 print(support)
-ggsave(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/supportingevidence_heatmap_2026.png", width = 7, height = 5)
-pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/supportingevidence_heatmap_2026.pdf", width = 7, height = 5)
+ggsave(file = "./manuscript/figures/supportingevidence_heatmap_2026.png", width = 7, height = 5)
+pdf(file = "./manuscript/figures/supportingevidence_heatmap_2026.pdf", width = 7, height = 5)
 print(support)
 dev.off()
 
 
 
 ############# METEOROLOGICAL FACTORS DISAGGREGATION FOR DISEASE BY CLIMATE ZONE AND COUNTRY OF STUDY
-epir_geo <- readRDS( file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/extracted_results/epidemiological_results_latlon_koppen_2026.rds")
+epir_geo <- readRDS( file = "./extracted_results/epidemiological_results_latlon_koppen_2026.rds")
 epir_geo$Country_clean <- recode(
   epir_geo$Country,
   "The_Gambia"   = "Gambia",
@@ -1218,8 +1214,8 @@ climstratmet <- ggplot(plot_datacountrystrat, aes(x = Country_clean, y = n_studi
     strip.background = element_blank())
 
 print(climstratmet)
-ggsave(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/supportingevidence_meteorologicalstratification_2026.png", width = 6, height = 3.5)
-pdf(file = "/Users/sophie.belman/Documents/Projects/scoping_review_2026/manuscript/figures/supportingevidence_meteorologicalstratification_2026.pdf", width = 6, height = 3.5)
+ggsave(file = "./manuscript/figures/supportingevidence_meteorologicalstratification_2026.png", width = 6, height = 3.5)
+pdf(file = "./manuscript/figures/supportingevidence_meteorologicalstratification_2026.pdf", width = 6, height = 3.5)
 print(climstratmet)
 dev.off()
 
@@ -1233,11 +1229,11 @@ library(dplyr)
 library(purrr)
 library(stringr)
 
-cigex <- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/excluded_reasons/june_2026_screen/cigarette_experiments/articles.csv")
+cigex <- fread("./excluded_reasons/june_2026_screen/cigarette_experiments/articles.csv")
 cigex$type <- "cigarette_experiment"
-pas<- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/excluded_reasons/june_2026_screen/passive_cigarettesmoke/articles.csv")
+pas<- fread("./excluded_reasons/june_2026_screen/passive_cigarettesmoke/articles.csv")
 pas$type <- "passive_smoking"
-air <- fread("/Users/sophie.belman/Documents/Projects/scoping_review_2026/excluded_reasons/june_2026_screen/isolationinair/articles.csv")
+air <- fread("./excluded_reasons/june_2026_screen/isolationinair/articles.csv")
 air$type <- "isolation_in_air"
 # 1. Helper function to extract the first surname (for sorting)
 get_first_surname <- function(author_str) {
@@ -1290,9 +1286,9 @@ pas_clean   <- clean_and_sort(pas)
 cigex_clean <- clean_and_sort(cigex)
 air_clean   <- clean_and_sort(air)
 # Save as three separate CSV files
-write.table(pas_clean,   "/Users/sophie.belman/Documents/Projects/scoping_review_2026/excluded_reasons/june_2026_screen/pas_clean.csv",   row.names = FALSE, quote = FALSE, sep = "\t")
-write.table(cigex_clean, "/Users/sophie.belman/Documents/Projects/scoping_review_2026/excluded_reasons/june_2026_screen/cigex_clean.csv", row.names = FALSE, quote = FALSE, sep = "\t")
-write.table(air_clean,   "/Users/sophie.belman/Documents/Projects/scoping_review_2026/excluded_reasons/june_2026_screen/air_clean.csv",   row.names = FALSE, quote = FALSE, sep = "\t")
+write.table(pas_clean,   "./excluded_reasons/june_2026_screen/pas_clean.csv",   row.names = FALSE, quote = FALSE, sep = "\t")
+write.table(cigex_clean, "./excluded_reasons/june_2026_screen/cigex_clean.csv", row.names = FALSE, quote = FALSE, sep = "\t")
+write.table(air_clean,   "./excluded_reasons/june_2026_screen/air_clean.csv",   row.names = FALSE, quote = FALSE, sep = "\t")
 ################################################################################
 # 
 # ########### STUDIES IN BOXES FROM EVIDENCE SUMMARY
